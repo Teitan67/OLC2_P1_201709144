@@ -23,7 +23,7 @@
 
 <body>
     <div class="btn-group" role="group" aria-label="Button group with nested dropdown" id="menu">
-        <button type="button" class="btn btn-secondary">Ejecutar <i class="fas fa-play"></i></button>
+        <button type="button" class="btn btn-secondary" onclick="analizar()">Ejecutar <i class="fas fa-play"></i></button>
         <button type="button" class="btn btn-secondary">Traducir <i class="fas fa-file-code"></i></button>
         <div class="btn-group" role="group">
             <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
@@ -42,8 +42,10 @@
         <textarea id="editor" rows="15" cols="180"></textarea>
     </div>
     <textarea id="consol" rows="7" cols="180" disabled="false">Esperando comandos...</textarea>
+
     <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
-    <script type="text/javascript" src="\js\jquery\jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="js\jquery\jquery.js"></script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>
@@ -55,6 +57,7 @@
         crossorigin="anonymous"></script>
 
     <script src="js/def-config.js"></script>
+    <script src="js/compilador.js"></script>
 </body>
 
 </html>
