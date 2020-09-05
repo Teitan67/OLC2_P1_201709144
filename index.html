@@ -18,6 +18,7 @@
     <script src="src/codemirror/mode/javascript/javascript.js"></script>
     <link rel="stylesheet" href="src/codemirror/theme/darcula.css" />
     <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/tabla_style.css"/>
 
 </head>
 
@@ -42,7 +43,19 @@
         <textarea id="editor" rows="15" cols="180"></textarea>
     </div>
     <textarea id="consol" rows="7" cols="180" disabled="false">Esperando comandos...</textarea>
-
+    <div id="tabla-errores">	
+			<h2 id="Titulo">Errores:</h2>
+			<table>
+				<tr id ="Cabeza">
+					<td> No.</td>
+					<td> Tipo error </td>
+					<td> Descripcion</td>
+					<td> Columna</td>
+					<td> Fila </td>
+                </tr>
+                
+			</table>
+	</div>
     <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
     <script type="text/javascript" src="js\jquery\jquery.js"></script>
 
