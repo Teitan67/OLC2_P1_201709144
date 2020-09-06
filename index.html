@@ -33,9 +33,9 @@
                 <i class="fas fa-file-invoice"></i>
             </button>
             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                <a class="dropdown-item" href="#">Reporte de errores</a>
-                <a class="dropdown-item" href="#">Reporte de tabla de simbolos</a>
-                <a class="dropdown-item" href="#">Reporte de AST</a>
+                <a class="dropdown-item" href="#tabla-errores">Reporte de errores</a>
+                <!--<a class="dropdown-item" href="#">Reporte de tabla de simbolos</a>-->
+                <button onclick="mostrarAST()" class="btnReportes"><a class="dropdown-item" href="#Ast">Reporte de AST</a></button>
             </div>
         </div>
     </div>
@@ -55,7 +55,11 @@
                 </tr>
                 
 			</table>
-	</div>
+    </div>
+    <div id="Ast">
+        <h2 id="Titulo">AST:</h2>
+        <img id="imgAST"></img>
+    </div>
     <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
     <script type="text/javascript" src="js\jquery\jquery.js"></script>
 
