@@ -187,7 +187,7 @@ NUMEROS:
     |mas   NUMEROS 
     |por por NUMEROS
 
-    |INCREMENTOS
+    |id mas mas
 
     |NUMEROS modular NUMEROS
 

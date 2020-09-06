@@ -33,6 +33,5 @@ function mostrarAST(){
 
   var imagen=document.getElementById('imgAST');
   imagen.src='src/img/descarga.png';
-  console.log(editor.getLine(1));
 }
 
