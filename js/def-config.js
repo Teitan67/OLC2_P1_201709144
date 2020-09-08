@@ -29,9 +29,11 @@ function analizar(){
   texto=editor.getValue();
   compilador.parse(texto);
 }
+var arbol='node1[label="hola"]; node2[label="mimir"]; node1->node2';
 function mostrarAST(){
-
-  var imagen=document.getElementById('imgAST');
-  imagen.src='src/img/descarga.png';
+  var code_graphviz='digraph  {   graph [bgcolor="transparent"];edge [color=white];node[style=filled];';
+  code_graphviz=code_graphviz+arbol+'}';
+  d3.select("#graph").graphviz()
+  .renderDot(code_graphviz);
 }
 

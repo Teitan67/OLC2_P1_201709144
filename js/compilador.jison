@@ -11,7 +11,7 @@
 "true"                      return 'true';
 "false"                     return 'false';
 \"[^"]*\"                   yytext = yytext.slice(1,-1);  return 'cadena';
-
+\'[^']*\'                   yytext = yytext.slice(1,-1);  return 'cadena';
 
 "number"                    return 'number';
 "boolean"                   return 'boolean';
@@ -29,6 +29,17 @@
 "while"                     return 'while';
 "do"                        return 'do';
 "for"                       return 'for';
+"of"                        return 'of';
+"in"                        return 'in';
+"continue"                  return 'continue';
+"break"                     return 'break';
+"return"                    return 'return';
+"switch"                    return 'switch';
+"case"                      return 'case';
+"default"                   return 'default';
+"type"                      return 'type';
+"pop"                       return 'pop';
+"push"                      return 'push';
 
 ">"                         return 'mayor';
 "<"                         return 'menor';
@@ -41,6 +52,7 @@
 "||"                        return 'or';
 "!"                         return 'not';
 
+"?"                         return 'qEs';
 "."                         return 'pt';
 ","                         return 'cm';
 "("                         return 'pa';
@@ -54,6 +66,8 @@
 "{"                         return 'lla';
 "}"                         return 'llc';
 "="                         return 'igual';
+"["                         return 'ca';
+"]"                         return 'cc';
 ";"                         return 'eos';
 ([a-zA-Z])[a-zA-Z0-9_]*	    return 'id';
 <<EOF>>                     return 'EOF';                 //End Of File
@@ -72,26 +86,51 @@
 %% /* language grammar */
 
 PROGRAMA:   
-    LSENTENCIAS EOF {console.log("Todo bien hasta ahora");}
+    INTRUCCIONES EOF {
+                        agregarNodo("INTRUCCIONES",true);
+                        agregarNodo("PROGRAMA",true);
+                        console.log(codeAST);
+                        arbol=codeAST;
+                    }
     |EOF
 ;
-
+INTRUCCIONES:
+     FUNCIONES   INTRUCCIONES
+    |LSENTENCIAS INTRUCCIONES
+    |FUNCIONES
+    |LSENTENCIAS                   {agregarNodo("LSENTENCIAS",true);}
+;
 LSENTENCIAS:
-    SENTENCIAS LSENTENCIAS
-    |SENTENCIAS
+    SENTENCIAS LSENTENCIAS      {agregarNodo("SENTENCIAS",true);agregarNodo("LSENTENCIAS",true);}
+    |SENTENCIAS                 {agregarNodo("SENTENCIAS",true);}
 ;
 SENTENCIAS:
     CONSOLA                              //
-    |VARIABLES                           //Ingresar al entorno qu le corresponde
-    |FUNCIONES
-    |F_LLAMADA eos
-    |ASIGNACION
+    |VARIABLES eos                      {agregarNodo(";",false); agregarNodo("Variables",true);} 
+
+    |F_LLAMADA  eos
+    |ASIGNACION eos
     |GRAFICADOR
     |IF
     |WHILE
     |DO_WHILE
     |FOR
+    |TYPE_CREAR
+    |INCREMENTOS eos 
+    |TRANSFERENCIAS eos
+    |SWITCH
     |error eos                           {console.log("Recuperacion:  ");}
+    |error llc                           {console.log("Recuperacion:  ");}
+;
+TYPE_CREAR:
+    type id igual lla TYPE_ATRIBUTOS llc
+;
+TYPE_ATRIBUTOS:
+     id dspts TIPO_DATO cm  TYPE_ATRIBUTOS
+    |id dspts TIPO_DATO eos TYPE_ATRIBUTOS
+    |id dspts TIPO_DATO     TYPE_ATRIBUTOS
+    |id dspts TIPO_DATO
+    |id dspts TIPO_DATO eos
 ;
 GRAFICADOR:
     graficar_ts pa pc eos
@@ -99,8 +138,40 @@ GRAFICADOR:
 CONSOLA:
     console pt log pa DATO pc eos  {$$=$5;}
 ;
+SWITCH:
+     switch pa DATO pc lla LISTA_CASES llc 
+    |switch pa DATO pc lla LISTA_CASES DEFAULT_CASE llc 
+;
+LISTA_CASES:
+     CASE LISTA_CASES 
+    |CASE
+;
+CASE:
+    case DATO dspts LSENTENCIAS
+;
+DEFAULT_CASE:
+    default dspts LSENTENCIAS
+;
+TRANSFERENCIAS:
+    continue 
+    |break 
+    |return 
+    |return DATO 
+;
 FOR:
-    for pa  pc lla LSENTENCIAS llc 
+     for pa FOR_ASIGNACION eos CONDICION eos FOR_INCREMENTO  pc lla LSENTENCIAS llc 
+    |for pa FOR_ASIGNACION in id pc lla LSENTENCIAS llc
+    |for pa FOR_ASIGNACION of id pc lla LSENTENCIAS llc 
+    |for pa FOR_ASIGNACION eos CONDICION eos FOR_INCREMENTO  pc lla              Sllc 
+;
+FOR_ASIGNACION:
+    VARIABLES
+    |ASIGNACION
+;
+
+FOR_INCREMENTO:
+    INCREMENTOS
+    |ASIGNACION
 ;
 DO_WHILE:
      do lla LSENTENCIAS llc while pa CONDICION pc
@@ -122,33 +193,56 @@ WHILE:
     |while pa CONDICION pc lla LSENTENCIAS llc
 ;
 ASIGNACION:
-    id igual DATO eos
+     id igual DATO 
+    |id igual lla TYPE_CONTENIDO llc
+    |id ca NUMEROS cc igual DATO
+;
+TYPE_CONTENIDO:
+     id dspts DATO cm TYPE_CONTENIDO
+    |id dspts DATO
 ;
 VARIABLES:
-    VARIABLES_ACCESO VARIABLES_CUERPO eos
+    VARIABLES_ACCESO  VARIABLES_CUERPO             
 ;
 VARIABLES_CUERPO:
-    id
+     id            {agregarNodo($1,false);}
+    |id ca cc 
+
     |id VARIABLES_ASIGNACION
+    |id ca cc VARIABLES_ASIGNACION
+
     |id VARIABLES_TIPO 
     |id VARIABLES_TIPO VARIABLES_ASIGNACION
 
     |id cm VARIABLES_CUERPO
+    |id ca cc cm VARIABLES_CUERPO
+
     |id VARIABLES_ASIGNACION cm VARIABLES_CUERPO
+    |id ca cc VARIABLES_ASIGNACION cm VARIABLES_CUERPO
+
     |id VARIABLES_TIPO cm VARIABLES_CUERPO
     |id VARIABLES_TIPO VARIABLES_ASIGNACION cm VARIABLES_CUERPO
 ;
 VARIABLES_ACCESO:
-    let
-    |var
-    |const
+    let                 {agregarNodo($1,false);}
+    |var                {agregarNodo($1,false);}
+    |const              {agregarNodo($1,false);}
 ;
 VARIABLES_TIPO:
-    dspts TIPO_DATO
+     dspts TIPO_DATO
+    |dspts TIPO_DATO ca cc 
 ;
 VARIABLES_ASIGNACION:
     igual DATO
     | igual CONDICION
+    | igual lla TYPE_CONTENIDO llc
+    | igual lla  llc
+    | igual ca ARRAY_CONTENIDO cc
+    | igual ca  cc
+;
+ARRAY_CONTENIDO:
+     DATO
+    |DATO cm ARRAY_CONTENIDO
 ;
 PARAMETROS:
     DATO
@@ -165,12 +259,18 @@ TIPO_FUNCION:
     |
 ;
 FUNCIONES:
-      function TIPO_FUNCION id pa PARAMETROS pc lla LSENTENCIAS llc 
-    | function TIPO_FUNCION  id pa PARAMETROS pc lla  llc 
-    | function TIPO_FUNCION id pa  pc lla LSENTENCIAS llc 
-    | function TIPO_FUNCION  id pa  pc lla  llc 
-;
+      function TIPO_FUNCION id pa PARAMETROS pc lla ISTR_FUNCION llc 
+    | function TIPO_FUNCION id pa PARAMETROS pc lla              llc 
 
+    | function TIPO_FUNCION  id pa  pc lla ISTR_FUNCION llc 
+    | function TIPO_FUNCION  id pa  pc lla              llc
+;
+ISTR_FUNCION:
+     LSENTENCIAS ISTR_FUNCION
+    |FUNCIONES   ISTR_FUNCION
+    |LSENTENCIAS
+    |FUNCIONES
+;
 //Cosas generales
 DATO:
     cadena
@@ -180,14 +280,17 @@ DATO:
     |true
     |false
     |F_LLAMADA
+    |CONDICION
+    |id ca NUMEROS cc
+    |id ca NUMEROS cc PROPIEDADES
+    |id PROPIEDADES
+    |OP_TERNARIO
 ;
 
 NUMEROS:
     menos NUMEROS %prec unmenos
     |mas   NUMEROS 
     |por por NUMEROS
-
-    |id mas mas
 
     |NUMEROS modular NUMEROS
 
@@ -201,6 +304,9 @@ NUMEROS:
     |numero
     |id
     |F_LLAMADA
+    |id ca NUMEROSS cc
+    |id PROPIEDADES
+    |id ca NUMEROSS cc PROPIEDADES
 
 ;
 INCREMENTOS:
@@ -213,6 +319,7 @@ TIPO_DATO:
     boolean
     |string
     |number
+    |id
 ;
 COMPARACION:
     DATO menor DATO
@@ -236,3 +343,28 @@ F_LLAMADA:
     id pa pc
     |id pa PARAMETROS pc
 ;
+PROPIEDADES:  
+      pt id 
+    | pt id ca NUMEROS cc 
+    | pt id PROPIEDADES
+    | pt id ca NUMEROS cc PROPIEDADES
+    | pt pop pa pc PROPIEDADES
+    | pt push pa pc PROPIEDADES
+    | pt pop pa pc 
+    | pt push pa pc 
+;
+OP_TERNARIO:
+    DATO qEs DATO dspts DATO
+;
+/*
+function a(){
+
+}
+let a;
+function a(){
+  function a(){
+    
+    }  
+}
+
+*/
