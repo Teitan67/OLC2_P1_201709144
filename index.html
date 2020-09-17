@@ -35,17 +35,17 @@
             <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                 <a class="dropdown-item" href="#tabla-errores">Reporte de errores</a>
                 <!--<a class="dropdown-item" href="#">Reporte de tabla de simbolos</a>-->
-                <button onclick="mostrarAST()" class="btnReportes"><a class="dropdown-item" href="#Ast">Reporte de AST</a></button>
+               <a class="dropdown-item" href="views/ast.html" target="_blank">Reporte de AST</a>
             </div>
         </div>
     </div>
-    <div id="diVeditor">
+    <div id="diVeditor" >
         <textarea id="editor" rows="15" cols="180"></textarea>
     </div>
     <textarea id="consol" rows="7" cols="180" disabled="false">Esperando comandos...</textarea>
     <div id="tabla-errores">	
 			<h2 id="Titulo">Errores:</h2>
-			<table>
+			<table id ="tabla">
 				<tr id ="Cabeza">
 					<td> No.</td>
 					<td> Tipo error </td>
@@ -56,10 +56,12 @@
                 
 			</table>
     </div>
-    <div id="Ast">
-        <h2 id="Titulo">AST:</h2>
-        <img id="imgAST"></img>
+
+    <div id="graph">
+        <h2 id="Titulo">AST JSON</h2>
+        <textarea id="JSONviwer"></textarea>
     </div>
+
     <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
     <script type="text/javascript" src="js\jquery\jquery.js"></script>
 
@@ -73,9 +75,14 @@
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
 
-    <script src="js/def-config.js"></script>
+ 
+    <script src="js/parseCadena.js"></script>
+    <script src="js/tablaSimbolos.js"></script>
+    <script src="js/AST_propiedades.js"></script>
+    <script src="js/interprete.js"></script>
     <script src="js/compilador.js"></script>
-    <script src="js/controlador_AST.js"></script>
+    <script src="js/def-config.js"></script>
+
 </body>
 
 </html>
