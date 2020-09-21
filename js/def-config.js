@@ -35,10 +35,11 @@ function reportarError(tipo, descripcion, columna, linea) {
 }
 
 let ast ;
-const tsGlobal = new TS([]);
+let tsGlobal;
 
 //Funciones del compilador
 function analizar() {
+  tsGlobal = new TS([]);
   limpiar();
   texto = editor.getValue();
   ast = compilador.parse(texto);
@@ -52,6 +53,22 @@ function limpiar(){
   $("#tabla #Cuerpo").remove(); 
   noErrores = 0 ;
 }
+
+function limpiarAmb(){
+  noVariables=0;
+  $("#tabla-amb #Cuerpop").remove(); 
+}
+
+let noVariables=0;
+
+function addVariable(nombre, tipo, ambito) {
+  ++noVariables;
+  var tabla = document.getElementById("tabla-amb");
+  tabla.insertAdjacentHTML("beforeend", "<tr id='Cuerpop'><td>" + noVariables + "</td><td>" + nombre + "</td><td>" + tipo + "</td><td>" + ambito + "</td></tr>");
+
+}
+
+
 
 /*
 var arbol='node1[label="hola"]; node2[label="mimir"]; node1->node2';

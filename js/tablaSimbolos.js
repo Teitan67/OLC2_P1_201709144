@@ -1,9 +1,12 @@
 const TIPO_DATO = {
-    NUMERO: 'NUMERO'
+    NUMERO: 'NUMBER',
+    BOOL:   'BOOLEANO',
+    CADENA: 'STRING'
 }
 
-function crearSimbolo(id, tipo, valor) {
+function crearSimbolo(acceso,id, tipo, valor) {
     return {
+        acceso:acceso,
         id: id,
         tipo: tipo,
         valor: valor
@@ -17,22 +20,46 @@ class TS {
         this._simbolos = simbolos;
     }
 
-    agregar(id, tipo) {
-        const nuevoSimbolo = crearSimbolo(id, tipo);
+    agregar(acceso,id, tipo, valor) {
+        const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor);
         this._simbolos.push(nuevoSimbolo);
     }
 
     actualizar(id, valor) {
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
         if (simbolo) simbolo.valor = valor;
-        else throw 'ERROR: variable: ' + id + ' no ha sido definida';
+        else reportarError("Semantico", "La siguiente variable no existe:<br>"+id, 0, 0);
     }
 
     obtener(id) {
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
 
         if (simbolo) return simbolo.valor;
-        else throw 'ERROR: variable: ' + id + ' no ha sido definida';
+        else reportarError("Semantico", "La siguiente variable no existe:<br>"+id, 0, 0);
+    }
+    verificarInsertar(id) {
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+
+        if (simbolo) return false;
+        else return true;
+    }
+
+    obtenerTipo(id) {
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+
+        if (simbolo) return simbolo.tipo;
+        else reportarError("Semantico", "La siguiente variable no existe:<br>"+id, 0, 0); return null;
+    }
+    obtenerVariable(id) {
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo) return simbolo;
+        else reportarError("Semantico", "La siguiente variable no existe:<br>"+id, 0, 0);
+    }
+
+    enviarVariable(id,sim) {
+        let simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo) simbolo = sim;
+        else reportarError("Semantico", "La siguiente variable no existe:<br>"+id, 0, 0);
     }
 
     get simbolos() {

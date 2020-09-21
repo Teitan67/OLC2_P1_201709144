@@ -30,18 +30,22 @@ const TIPO_OPERACION = {
 	AND:			'OP_AND',
 	OR:				'OP_OR',
     
-	CONCATENACION:  'OP_CONCATENACION'
+	CONCATENACION:  'OP_CONCATENACION',
+	CREAR_VAR:		'OP_CREAR_VARIABLE',
+	ASIGNAR_VAR:	'OP_ASIGNA_VARIABLE'
 };
 
 // Constantes para los tipos de 'instrucciones' válidas en nuestra gramática.
 const TIPO_INSTRUCCION = {
-	IMPRIMIR:    'INSTR_IMPRIMIR',
-	MIENTRAS:    'INSTR_MIENTRAS',
-	DECLARACION: 'INSTR_DECLARACION',
-	ASIGNACION:  'INSTR_ASIGANCION',
-	IF:          'INSTR_IF',
-	IF_ELSE:     'INSTR_ELSE',
-	ERROR:		 'INSTR_RECUPERACION'
+	IMPRIMIR:    		'INSTR_IMPRIMIR',
+	MIENTRAS:    		'INSTR_MIENTRAS',
+	DECLARACION: 		'INSTR_DECLARACION',
+	ASIGNACION:  		'INSTR_ASIGANCION',
+	IF:          		'INSTR_IF',
+	IF_ELSE:     		'INSTR_ELSE',
+	ERROR:		 		'INSTR_RECUPERACION',
+	CREAR_VARIABLE:     'INSTR_CREAR_VARIABLE',
+	GRAFICAR:			'INSTR_GRAFICAR'
 }
 
 //Operacion generica
@@ -90,48 +94,6 @@ const instruccionesAST = {
 	},
 
 	/**
-	 * Crea un objeto tipo Instrucción para la sentencia Mientras.
-	 */
-	nuevoMientras: function(expresionLogica, instrucciones) {
-		return {
-			tipo: TIPO_INSTRUCCION.MIENTRAS,
-			expresionLogica: expresionLogica,
-			instrucciones: instrucciones
-		};
-	},
-
-	/**
-	 * Crea un objeto tipo Instrucción para la sentencia Declaración.
-	 */
-	nuevoDeclaracion: function(identificador) {
-		return {
-			tipo: TIPO_INSTRUCCION.DECLARACION,
-			identificador: identificador
-		}
-	},
-
-	/**
-	 * Crea un objeto tipo Instrucción para la sentencia Asignación.
-	 */
-	nuevoAsignacion: function(identificador, expresionNumerica) {
-		return {
-			tipo: TIPO_INSTRUCCION.ASIGNACION,
-			identificador: identificador,
-			expresionNumerica: expresionNumerica
-		}
-	},
-
-	/**
-	 * Crea un objeto tipo Instrucción para la sentencia If.
-	 */
-	nuevoIf: function(expresionLogica, instrucciones) {
-		return {
-			tipo: TIPO_INSTRUCCION.IF,
-			expresionLogica: expresionLogica,
-			instrucciones: instrucciones
-		}
-	},
-		/**
 	 * Crea un objeto tipo Instrucción para la sentencia If.
 	 */
 	saltoError: function() {
@@ -140,16 +102,37 @@ const instruccionesAST = {
 		}
 	},
 
-	/**
-	 * Crea un objeto tipo Instrucción para la sentencia If-Else.
-
-	 */
-	nuevoIfElse: function(expresionLogica, instruccionesIfVerdadero, instruccionesIfFalso) {
-		return {
-			tipo: TIPO_INSTRUCCION.IF_ELSE,
-			expresionLogica: expresionLogica,
-			instruccionesIfVerdadero: instruccionesIfVerdadero,
-			instruccionesIfFalso: instruccionesIfFalso
+	crearVariable:function(id,tipo,valor){
+		return{
+			tipo: TIPO_OPERACION.CREAR_VAR,
+			identificador:id,
+			tipo_var:tipo,
+			valor:valor
+		}
+	},
+	nuevaVariable:function(acceso,variables){
+		return{
+			tipo:TIPO_INSTRUCCION.CREAR_VARIABLE,
+			acceso: acceso,
+			variables: variables
+		}
+	},
+	nuevasAsignaciones:function(asignaciones){
+		return{
+			tipo: TIPO_INSTRUCCION.ASIGNACION,
+			asignacion:asignaciones
+		}
+	},
+	nuevaAsignacion:function(id,valor){
+		return{
+			tipo: TIPO_OPERACION.ASIGNAR_VAR,
+			identificador:id,
+			valor:valor
+		}
+	},
+	graficar_ts:function(){
+		return{
+			tipo:TIPO_INSTRUCCION.GRAFICAR
 		}
 	}
 }
