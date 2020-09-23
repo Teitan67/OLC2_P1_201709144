@@ -105,6 +105,8 @@ SENTENCIAS:
     |INST_CREAR_VARIABLES                        {$$=$1;}
     |INST_ASIGNAR_VARIABLES                      {$$=$1;}
     |GRAFICADOR                                  {$$=$1;}
+    |IF                                          {$$=$1;}
+
     |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
 ;
 
@@ -113,15 +115,15 @@ CONSOLA:
 ;
 DATO_CONSOL:
         EXP_CADENA                                  { $$ = $1; }
-        |DATO_CONSOL mas   DATO_CONSOL              { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
+//        |DATO_CONSOL mas   DATO_CONSOL              { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |DATO_CONSOL cm DATO_CONSOL                 { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |EXP_NUMERICA                               { $$ = $1; }
-        |CONDICION                                  { $$ = $1; }
+//        |CONDICION                                  { $$ = $1; }
 ;
 DATO:
         EXP_CADENA                                  { $$ = $1; }
         |EXP_NUMERICA                               { $$ = $1; }
-        |CONDICION                                  { $$ = $1; }
+//        |CONDICION                                  { $$ = $1; }
 ;
 EXP_CADENA:
      cadena                                     { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.CADENA);}
@@ -151,8 +153,8 @@ COMPARACION:
     |EXP_NUMERICA mayorIgual    EXP_NUMERICA        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MAYOR_IGUAL);}
     |DATO_COMPARACION mismo DATO_COMPARACION        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.IGUAL);}
     |DATO_COMPARACION diferente DATO_COMPARACION    { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.DIFERENTE);}
-    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
-    |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+//    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+//    |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
 ;
 DATO_COMPARACION:
      EXP_CADENA                                 { $$ = $1; }
@@ -205,4 +207,16 @@ INST_ASIGNAR_VARIABLES:
 ASIGNACION:
      id VARIABLES_ASIGNACION                      { $$ = [instruccionesAST.nuevaAsignacion($1,$2)];}
     |id VARIABLES_ASIGNACION cm ASIGNACION        { $4.push(instruccionesAST.nuevaAsignacion($1,$2)); $$ = $4;}
+;
+IF:
+     if pa CONDICION pc lla LSENTENCIAS llc       { $$ = instruccionesAST.nuevoIf($3,$6,"null");}
+    |if pa CONDICION pc lla LSENTENCIAS llc ELSE  { $$ = instruccionesAST.nuevoIf($3,$6,$8)}
+;
+ELSE:
+     else IF                    {$$ = $2;}
+    |else lla LSENTENCIAS llc   {$$ = instruccionesAST.nuevoElse($3);}
+;
+
+WHILE:
+    while pa CONDICION pc lla LSENTENCIAS llc     { $$ = ;}
 ;

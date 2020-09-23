@@ -17,8 +17,10 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             graficar(tablaDeSimbolos);
         } else if (instruccion.tipo == TIPO_INSTRUCCION.ASIGNACION) {
             procesarAsignaciones(instruccion, tablaDeSimbolos);
-        } else {
-            console.error('ERROR: tipo de instrucción no válido: ' + instruccion);
+        } else if(instruccion.tipo==TIPO_INSTRUCCION.IF){
+            procesarIf(instruccion,tablaDeSimbolos);
+        }else {
+            console.error('ERROR: tipo de instrucción no válido: ' + JSON.stringify(instruccion));
         }
     });
 }
@@ -58,7 +60,7 @@ function procesarExpresionCadena(expresion, tablaDeSimbolos) {
 
         const cadIzq = procesarExpresionCadena(expresion.operandoIzq, tablaDeSimbolos);      // resolvemos el operando izquierdo.
         const cadDer = procesarExpresionCadena(expresion.operandoDer, tablaDeSimbolos);      // resolvemos el operando derecho.
-        return cadIzq + cadDer;
+        return cadIzq.toString() + cadDer.toString();
     } else if (expresion.tipo === TIPO_VALOR.CADENA) {
         var val = parseCadena.parse(expresion.valor);
         return val;
@@ -234,6 +236,27 @@ function procesarConsultaVariable(expresion, tablaDeSimbolos) {
 
     return tablaDeSimbolos.obtener(expresion.valor);
     //instruccionesAST.TIPO_VALOR(tipo,valor);
+}
+
+function procesarIf(instruccion,tablaDeSimbolos){
+    let condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
+    condicion=condicion.toString();
+    const tsIf = new TS(tablaDeSimbolos.simbolos);
+    ambito="local";
+    if(condicion==="true"){
+        procesarBloque(instruccion.sentencias,tsIf);
+    }else{
+        if(instruccion.elseIf!="null"){
+            if(instruccion.elseIf.tipo==TIPO_INSTRUCCION.ELSE){
+                procesarBloque(instruccion.elseIf.sentencias);
+            }else{
+                procesarIf(instruccion.elseIf,tsIf);
+            }
+            
+        }
+    }
+    ambito="global";
+
 }
 
 function procesarAsignaciones(instruccion, tablaDeSimbolos) {

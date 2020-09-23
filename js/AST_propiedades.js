@@ -45,7 +45,8 @@ const TIPO_INSTRUCCION = {
 	IF_ELSE:     		'INSTR_ELSE',
 	ERROR:		 		'INSTR_RECUPERACION',
 	CREAR_VARIABLE:     'INSTR_CREAR_VARIABLE',
-	GRAFICAR:			'INSTR_GRAFICAR'
+	GRAFICAR:			'INSTR_GRAFICAR',
+	ELSE:				'INSTR_ELSE'
 }
 
 //Operacion generica
@@ -134,5 +135,22 @@ const instruccionesAST = {
 		return{
 			tipo:TIPO_INSTRUCCION.GRAFICAR
 		}
+	},
+	nuevoIf:function(condicion,sentencias,elseIf){
+		return{
+			tipo:TIPO_INSTRUCCION.IF,
+			condicion:condicion,
+			sentencias:sentencias,
+			elseIf: elseIf
+		}
+	},
+	nuevoElse:function(sentencias){
+		return{
+			tipo:TIPO_INSTRUCCION.ELSE,
+			sentencias:sentencias
+		}
+	},
+	nuevoWhile:function(condicion){
+
 	}
 }
