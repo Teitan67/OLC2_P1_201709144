@@ -1,15 +1,24 @@
+const ambGlobal="global";
+const ambLocal ="local_";
+
+let ambito = ambGlobal;
+let noAmbito=0;
+
+
 const TIPO_DATO = {
     NUMERO: 'NUMBER',
     BOOL:   'BOOLEANO',
     CADENA: 'STRING'
 }
 
+
 function crearSimbolo(acceso,id, tipo, valor) {
     return {
         acceso:acceso,
         id: id,
         tipo: tipo,
-        valor: valor
+        valor: valor,
+        ambito:ambito
     }
 }
 
@@ -37,11 +46,25 @@ class TS {
         if (simbolo) return simbolo.valor;
         else reportarError("Semantico", "La siguiente variable no existe:<br>"+id, 0, 0);
     }
+    verificarInsertar(id,auxAmbito) {
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo){
+            if(simbolo.ambito!=auxAmbito){
+                return true;
+            }
+            return false
+        }else {
+            return true;
+        }
+    }
+
     verificarInsertar(id) {
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
-
-        if (simbolo) return false;
-        else return true;
+        if (simbolo){
+            return false
+        }else {
+            return true;
+        }
     }
 
     obtenerTipo(id) {

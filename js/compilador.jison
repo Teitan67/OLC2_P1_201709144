@@ -101,16 +101,18 @@ LSENTENCIAS:
     |SENTENCIAS                                 { $$ = [$1]; }
 ;
 SENTENCIAS:
-     CONSOLA                                     {$$=$1;}
+     INST_CONSOLA                                {$$=$1;}
     |INST_CREAR_VARIABLES                        {$$=$1;}
     |INST_ASIGNAR_VARIABLES                      {$$=$1;}
-    |GRAFICADOR                                  {$$=$1;}
-    |IF                                          {$$=$1;}
-
+    |INST_GRAFICADOR                             {$$=$1;}
+    |INST_IF                                     {$$=$1;}
+    |INST_WHILE                                  {$$=$1;}
+    |INST_DO_WHILE                               {$$=$1;}
     |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
+    |error llc                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
 ;
 
-CONSOLA:
+INST_CONSOLA:
      console pt log pa DATO_CONSOL pc eos               { $$ = instruccionesAST.nuevoImprimir($5);}
 ;
 DATO_CONSOL:
@@ -197,7 +199,7 @@ TIPO_DATO:
 VARIABLES_ASIGNACION:
      igual DATO     { $$ = $2;}
 ;
-GRAFICADOR:
+INST_GRAFICADOR:
     graficar_ts pa pc eos   { $$ = instruccionesAST.graficar_ts(); }
 ;
 
@@ -208,7 +210,7 @@ ASIGNACION:
      id VARIABLES_ASIGNACION                      { $$ = [instruccionesAST.nuevaAsignacion($1,$2)];}
     |id VARIABLES_ASIGNACION cm ASIGNACION        { $4.push(instruccionesAST.nuevaAsignacion($1,$2)); $$ = $4;}
 ;
-IF:
+INST_IF:
      if pa CONDICION pc lla LSENTENCIAS llc       { $$ = instruccionesAST.nuevoIf($3,$6,"null");}
     |if pa CONDICION pc lla LSENTENCIAS llc ELSE  { $$ = instruccionesAST.nuevoIf($3,$6,$8)}
 ;
@@ -217,6 +219,10 @@ ELSE:
     |else lla LSENTENCIAS llc   {$$ = instruccionesAST.nuevoElse($3);}
 ;
 
-WHILE:
-    while pa CONDICION pc lla LSENTENCIAS llc     { $$ = ;}
+INST_WHILE:
+    while pa CONDICION pc lla LSENTENCIAS llc     { $$ = instruccionesAST.nuevoWhile($3,$6);}
+;
+
+INST_DO_WHILE:
+    do lla LSENTENCIAS llc while pa CONDICION pc  { $$ = instruccionesAST.nuevoDoWhile($7,$3);}
 ;

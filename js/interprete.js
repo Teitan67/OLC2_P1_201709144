@@ -1,7 +1,5 @@
-
-
 // Procesamos las instrucciones reconocidas en nuestro AST
-let ambito = "global";
+
 
 function procesarBloque(instrucciones, tablaDeSimbolos) {
     instrucciones.forEach(instruccion => {
@@ -19,6 +17,10 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             procesarAsignaciones(instruccion, tablaDeSimbolos);
         } else if(instruccion.tipo==TIPO_INSTRUCCION.IF){
             procesarIf(instruccion,tablaDeSimbolos);
+        }else if(instruccion.tipo==TIPO_INSTRUCCION.WHILE){
+            procesarWhile(instruccion,tablaDeSimbolos);
+        }else if(instruccion.tipo==TIPO_INSTRUCCION.DO_WHILE){
+            procesarDoWhile(instruccion,tablaDeSimbolos);
         }else {
             console.error('ERROR: tipo de instrucción no válido: ' + JSON.stringify(instruccion));
         }
@@ -29,7 +31,7 @@ function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
     let acceso = instruccion.acceso;
 
     for (let variable of instruccion.variables) {
-        if (tablaDeSimbolos.verificarInsertar(variable.identificador)) {
+        if (tablaDeSimbolos.verificarInsertar(variable.identificador,ambito)) {
             if (puedoInsertar(variable.valor, variable.tipo_var)) {
                 if (variable.tipo === TIPO_OPERACION.CREAR_VAR) {
                     let val = null;
@@ -88,7 +90,7 @@ function procesarExpresionCadena(expresion, tablaDeSimbolos) {
 
         return procesarConsultaVariable(expresion, tablaDeSimbolos);
     } else {
-        console.error("Instruccion no reconocida: " + expresion);
+        console.error("Instruccion no reconocida: " + JSON.stringify(expresion));
     }
 }
 
@@ -96,6 +98,7 @@ function procesarExpresionNumerica(expresion, tablaDeSimbolos) {
     if (expresion.tipo === TIPO_VALOR.NUMERO) {
         return expresion.valor;
     } else if (expresion.tipo === TIPO_VALOR.IDENTIFICADOR) {
+
         if (tablaDeSimbolos.obtenerTipo(expresion.valor) == "number") {
             return procesarConsultaVariable(expresion, tablaDeSimbolos);
         } else {
@@ -161,7 +164,7 @@ function procesarExpresionComparativa(expresion, tablaDeSimbolos) {
 function graficar(tablaDeSimbolos) {
     limpiarAmb();
     for (const variable of tablaDeSimbolos._simbolos) {
-        addVariable(variable.id, variable.tipo, ambito);
+        addVariable(variable.id, variable.tipo, variable.ambito);
     }
 }
 
@@ -242,7 +245,8 @@ function procesarIf(instruccion,tablaDeSimbolos){
     let condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
     condicion=condicion.toString();
     const tsIf = new TS(tablaDeSimbolos.simbolos);
-    ambito="local";
+    noAmbito++;
+    ambito=ambLocal+noAmbito;
     if(condicion==="true"){
         procesarBloque(instruccion.sentencias,tsIf);
     }else{
@@ -255,7 +259,8 @@ function procesarIf(instruccion,tablaDeSimbolos){
             
         }
     }
-    ambito="global";
+    noAmbito--;
+    ambito=ambGlobal;
 
 }
 
@@ -266,7 +271,7 @@ function procesarAsignaciones(instruccion, tablaDeSimbolos) {
             if (puedoInsertar(variable.valor,auxVariable.tipo)) {
                 if(auxVariable.acceso!="const"&&(auxVariable.valor!="null"||auxVariable.valor!=null)){
                     auxVariable.tipo=tipoDato(variable.valor);
-                    auxVariable.valor = procesarExpresionCadena(variable.valor);
+                    auxVariable.valor = procesarExpresionCadena(variable.valor,tablaDeSimbolos);
                     //console.log(JSON.stringify(variable));
                     tablaDeSimbolos.enviarVariable(auxVariable.id,auxVariable);
                 }else{
@@ -281,3 +286,39 @@ function procesarAsignaciones(instruccion, tablaDeSimbolos) {
         }
     }
 }
+
+function procesarWhile(instruccion,tablaDeSimbolos){
+    let condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
+    condicion=condicion.toString();
+    let tsWhl = new TS(tablaDeSimbolos.simbolos);
+    noAmbito++;
+    ambito=ambLocal+noAmbito;
+    while (condicion==="true") {
+        procesarBloque(instruccion.sentencias,tsWhl);
+        condicion = procesarExpresionCadena(instruccion.condicion,tsWhl);
+        condicion=condicion.toString();
+    }
+    noAmbito--;
+    ambito=ambGlobal;
+}
+
+function procesarDoWhile(instruccion,tablaDeSimbolos){
+    let condicion = procesarExpresionCadena(instruccion.condicion,tablaDeSimbolos);
+    condicion=condicion.toString();
+    let tsDoWhl = new TS(tablaDeSimbolos.simbolos);
+    noAmbito++;
+    ambito=ambLocal+noAmbito;
+    do{
+        procesarBloque(instruccion.sentencias,tsDoWhl);
+        condicion = procesarExpresionCadena(instruccion.condicion,tsDoWhl);
+        condicion=condicion.toString();
+        console.log(condicion);
+    }while (condicion==="true")
+    noAmbito--;
+    ambito=ambGlobal;
+}
+
+/*
+
+
+*/ 

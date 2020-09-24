@@ -38,15 +38,16 @@ const TIPO_OPERACION = {
 // Constantes para los tipos de 'instrucciones' válidas en nuestra gramática.
 const TIPO_INSTRUCCION = {
 	IMPRIMIR:    		'INSTR_IMPRIMIR',
-	MIENTRAS:    		'INSTR_MIENTRAS',
 	DECLARACION: 		'INSTR_DECLARACION',
 	ASIGNACION:  		'INSTR_ASIGANCION',
 	IF:          		'INSTR_IF',
-	IF_ELSE:     		'INSTR_ELSE',
+
 	ERROR:		 		'INSTR_RECUPERACION',
 	CREAR_VARIABLE:     'INSTR_CREAR_VARIABLE',
 	GRAFICAR:			'INSTR_GRAFICAR',
-	ELSE:				'INSTR_ELSE'
+	ELSE:				'INSTR_ELSE',
+	WHILE:			    'INSTR_WHILE',
+	DO_WHILE:			'INSTR_DO_WHILE'
 }
 
 //Operacion generica
@@ -150,7 +151,19 @@ const instruccionesAST = {
 			sentencias:sentencias
 		}
 	},
-	nuevoWhile:function(condicion){
+	nuevoWhile:function(condicion,sentencias){
+		return{
+			tipo:TIPO_INSTRUCCION.WHILE,
+			condicion: condicion,
+			sentencias:sentencias
+		}
 
+	},
+	nuevoDoWhile:function(condicion,sentencias){
+		return{
+			tipo: TIPO_INSTRUCCION.DO_WHILE,
+			condicion:condicion,
+			sentencias:sentencias
+		}
 	}
 }
