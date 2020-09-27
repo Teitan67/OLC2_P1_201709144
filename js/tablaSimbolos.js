@@ -1,8 +1,9 @@
 const ambGlobal="global";
 const ambLocal ="local_";
 
-let ambito = ambGlobal;
 let noAmbito=0;
+let ambito = ambGlobal;
+
 
 
 const TIPO_DATO = {
@@ -31,7 +32,7 @@ class TS {
 
     agregar(acceso,id, tipo, valor) {
         const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor);
-        this._simbolos.push(nuevoSimbolo);
+        this._simbolos.unshift(nuevoSimbolo);
     }
 
     actualizar(id, valor) {
@@ -46,12 +47,9 @@ class TS {
         if (simbolo) return simbolo.valor;
         else reportarError("Semantico", "La siguiente variable no existe:<br>"+id, 0, 0);
     }
-    verificarInsertar(id,auxAmbito) {
-        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+    verificarInsertarAsig(id,auxAmbito) {
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id&&auxAmbito===simbolo.ambito)[0];
         if (simbolo){
-            if(simbolo.ambito!=auxAmbito){
-                return true;
-            }
             return false
         }else {
             return true;
@@ -87,5 +85,15 @@ class TS {
 
     get simbolos() {
         return this._simbolos;
+    }
+
+    limpiar(ambito) { 
+        var tabla = [];
+        this._simbolos.filter(function(simbolo){ 
+            console.log(JSON.stringify( simbolo),ambito);
+            console.log(simbolo.ambito !== ambito);
+            if(simbolo.ambito !== ambito)tabla.push(simbolo)
+            return simbolo.ambito !== ambito; })[0];
+        this._simbolos=tabla;
     }
 }

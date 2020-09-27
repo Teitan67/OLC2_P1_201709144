@@ -103,13 +103,17 @@ LSENTENCIAS:
 SENTENCIAS:
      INST_CONSOLA                                {$$=$1;}
     |INST_CREAR_VARIABLES                        {$$=$1;}
-    |INST_ASIGNAR_VARIABLES                      {$$=$1;}
+    |INST_ASIGNAR_VARIABLES eos                  {$$=$1;}
     |INST_GRAFICADOR                             {$$=$1;}
     |INST_IF                                     {$$=$1;}
     |INST_WHILE                                  {$$=$1;}
     |INST_DO_WHILE                               {$$=$1;}
-    |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
-    |error llc                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
+    |INST_INCREMENTO eos                         {$$=$1;}
+    |INST_FOR                                    {$$=$1;}
+    |INST_CREAR_ARREGLO                          {$$=$1;}
+    |INST_ASIGNAR_ARREGLO                        {$$=$1;}
+//    |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
+//    |error llc                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
 ;
 
 INST_CONSOLA:
@@ -137,8 +141,11 @@ EXP_NUMERICA:
     |EXP_NUMERICA por   EXP_NUMERICA            { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MULTIPLICACION);}
     |EXP_NUMERICA div   EXP_NUMERICA            { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.DIVISION);}
     |menos EXP_NUMERICA %prec UMENOS		    { $$ = instruccionesAST.nuevoOperacionUnaria($2, TIPO_OPERACION.NEGATIVO); }
+    |por por EXP_NUMERICA                       { $$ = instruccionesAST.nuevoOperacionUnaria($3,TIPO_OPERACION.POTENCIA);}
+    |EXP_NUMERICA modular EXP_NUMERICA          { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MODULAR);}
     |id                                         { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.IDENTIFICADOR)}
     |pa EXP_NUMERICA pc                         { $$ = $2;}
+    |id ca EXP_NUMERICA cc                      { $$ = instruccionesAST.nuevoValorArreglo($1,$3, TIPO_VALOR.ARREGLO);}
 ;
 CONDICION:
      CONDICION and CONDICION                    { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.AND);}
@@ -204,7 +211,7 @@ INST_GRAFICADOR:
 ;
 
 INST_ASIGNAR_VARIABLES:
-    ASIGNACION eos                                { $$ = instruccionesAST.nuevasAsignaciones($1);}             
+    ASIGNACION                                    { $$ = instruccionesAST.nuevasAsignaciones($1);}             
 ;
 ASIGNACION:
      id VARIABLES_ASIGNACION                      { $$ = [instruccionesAST.nuevaAsignacion($1,$2)];}
@@ -225,4 +232,36 @@ INST_WHILE:
 
 INST_DO_WHILE:
     do lla LSENTENCIAS llc while pa CONDICION pc  { $$ = instruccionesAST.nuevoDoWhile($7,$3);}
+;
+
+INST_INCREMENTO: 
+     id mas mas  { $$ = instruccionesAST.nuevoIncremento($1);}
+    |id menos menos  { $$ = instruccionesAST.nuevoDecremento($1);}
+;
+INST_FOR:
+    for pa FOR_ASIGNACION   CONDICION eos FOR_AUMENTO pc lla LSENTENCIAS llc   {$$ = instruccionesAST.nuevoFor($3,$4,$6,$9);}
+;
+FOR_ASIGNACION:
+    INST_CREAR_VARIABLES            {$$=$1;}
+    |INST_ASIGNAR_VARIABLES eos     {$$=$1;}
+;
+FOR_AUMENTO:
+     INST_INCREMENTO            {$$=$1;}
+    |INST_ASIGNAR_VARIABLES     {$$=$1;}
+;
+
+INST_CREAR_ARREGLO:
+     VARIABLES_ACCESO id ca cc eos                                                {$$=instruccionesAST.nuevoArreglo($1,$2,null,[]);}
+    |VARIABLES_ACCESO id ca cc VARIABLES_TIPO eos                                 {$$=instruccionesAST.nuevoArreglo($1,$2,$5,[]);}
+    |VARIABLES_ACCESO id ca cc igual ca ARREGLO_DATOS cc eos                    {$$=instruccionesAST.nuevoArreglo($1,$2,null,$7);}
+    |VARIABLES_ACCESO id ca cc VARIABLES_TIPO igual ca ARREGLO_DATOS cc eos     {$$=instruccionesAST.nuevoArreglo($1,$2,$5,$8);}
+;
+
+ARREGLO_DATOS:
+     DATO cm ARREGLO_DATOS  { $3.push($1); $$ = $3;}
+    |DATO                   { $$ = [$1];}
+;
+
+INST_ASIGNAR_ARREGLO:
+    id ca EXP_NUMERICA cc igual DATO eos    { $$ = instruccionesAST.nuevaAsignacionArreglo($1,$3,$6);}
 ;

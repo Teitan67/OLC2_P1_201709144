@@ -33,6 +33,7 @@ const TIPO_OPERACION = {
 	CONCATENACION:  'OP_CONCATENACION',
 	CREAR_VAR:		'OP_CREAR_VARIABLE',
 	ASIGNAR_VAR:	'OP_ASIGNA_VARIABLE'
+	
 };
 
 // Constantes para los tipos de 'instrucciones' válidas en nuestra gramática.
@@ -47,7 +48,12 @@ const TIPO_INSTRUCCION = {
 	GRAFICAR:			'INSTR_GRAFICAR',
 	ELSE:				'INSTR_ELSE',
 	WHILE:			    'INSTR_WHILE',
-	DO_WHILE:			'INSTR_DO_WHILE'
+	DO_WHILE:			'INSTR_DO_WHILE',
+	INCREMENTO:			'INSTR_INCREMENTO',
+	FOR:				'INSTR_FOR',
+	DECREMENTO:			'INSTR_DECREMENTO',
+	CREAR_ARREGLO:   	'INSTR_CREAR_ARREGLO',
+	ASIGNAR_ARREGLO:	'INSTR_ASIGNAR_ARREGLO'
 }
 
 //Operacion generica
@@ -84,6 +90,13 @@ const instruccionesAST = {
 			valor: valor
 		}
 	},
+	nuevoValorArreglo: function(valor,indice, tipo) {
+		return {
+			tipo: tipo,
+			indice:indice,
+			valor: valor
+		}
+	},
 
 	/**
 	 * Crea un objeto tipo Instrucción para la sentencia Imprimir.
@@ -94,7 +107,14 @@ const instruccionesAST = {
 			expresionCadena: expresionCadena
 		};
 	},
-
+	nuevaAsignacionArreglo:function(id,indice,valor){
+		return{
+			tipo:TIPO_INSTRUCCION.ASIGNAR_ARREGLO,
+			identificador:id,
+			indice:indice,
+			valor:valor
+		}
+	},
 	/**
 	 * Crea un objeto tipo Instrucción para la sentencia If.
 	 */
@@ -164,6 +184,36 @@ const instruccionesAST = {
 			tipo: TIPO_INSTRUCCION.DO_WHILE,
 			condicion:condicion,
 			sentencias:sentencias
+		}
+	},
+	nuevoIncremento:function(id){
+		return{
+			tipo: TIPO_INSTRUCCION.INCREMENTO,
+			identificador: id
+		}
+	},
+	nuevoDecremento:function(id){
+		return{
+			tipo: TIPO_INSTRUCCION.DECREMENTO,
+			identificador: id
+		}
+	},
+	nuevoFor:function(variable,condicion,incremento,sentencias){
+		return{
+			tipo: TIPO_INSTRUCCION.FOR,
+			variable: variable,
+			condicion: condicion,
+			incremento:incremento,
+			sentencias:sentencias
+		}
+	},
+	nuevoArreglo:function(acceso,id,tipo_Var,datos){
+		return{
+			tipo: TIPO_INSTRUCCION.CREAR_ARREGLO,
+			acceso:acceso,
+			id: id,
+			tipo_var:tipo_Var,
+			datos:datos
 		}
 	}
 }
