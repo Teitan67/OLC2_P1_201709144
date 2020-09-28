@@ -7,7 +7,9 @@ const TIPO_VALOR = {
 	BOOLEANO:      'VAL_BOOLEANO',
 	LLAMADO:	   'VAL_LLAMADO',
 	ARREGLO:       'VAL_ARREGLO',
-	ATRIBUTO:	   'VAL_ATRIBUTO'
+	ATRIBUTO:	   'VAL_ATRIBUTO',
+	LENGTH: 	   'VAL_LENGTH',
+	POP:		   'VAL_POP'
 }
 
 // Constantes para los tipos de 'operaciones' que soporta nuestra gramática.
@@ -53,7 +55,8 @@ const TIPO_INSTRUCCION = {
 	FOR:				'INSTR_FOR',
 	DECREMENTO:			'INSTR_DECREMENTO',
 	CREAR_ARREGLO:   	'INSTR_CREAR_ARREGLO',
-	ASIGNAR_ARREGLO:	'INSTR_ASIGNAR_ARREGLO'
+	ASIGNAR_ARREGLO:	'INSTR_ASIGNAR_ARREGLO',
+	PUSH:				'INSTR_PUSH'
 }
 
 //Operacion generica
@@ -214,6 +217,25 @@ const instruccionesAST = {
 			id: id,
 			tipo_var:tipo_Var,
 			datos:datos
+		}
+	},
+	nuevoLength:function(id){
+		return{
+			tipo: TIPO_VALOR.LENGTH,
+			identificador:id
+		}
+	},
+	nuevoPush:function(id,dato){
+		return{
+			tipo:TIPO_INSTRUCCION.PUSH,
+			identificador:id,
+			valor:dato
+		}
+	},
+	nuevoPop:function(id,tipo){
+		return{
+			tipo: tipo,
+			valor:id
 		}
 	}
 }

@@ -87,13 +87,21 @@ class TS {
         return this._simbolos;
     }
 
-    limpiar(ambito) { 
+    getLength(id){
+        let sim=this.obtenerVariable(id);
+        let valores=sim.valor;
+    //  console.log(valores.length);
+        return valores.length;
+    }
+    limpiar(ambito_entrada) { 
         var tabla = [];
+
         this._simbolos.filter(function(simbolo){ 
-            console.log(JSON.stringify( simbolo),ambito);
-            console.log(simbolo.ambito !== ambito);
-            if(simbolo.ambito !== ambito)tabla.push(simbolo)
-            return simbolo.ambito !== ambito; })[0];
+            if(simbolo.ambito !== ambito_entrada){
+                tabla.push(simbolo)
+            }
+        })[0];
+        
         this._simbolos=tabla;
     }
 }

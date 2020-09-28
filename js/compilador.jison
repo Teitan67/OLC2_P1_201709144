@@ -40,6 +40,7 @@
 "case"                      return 'case';
 "default"                   return 'default';
 "type"                      return 'type';
+"length"                    return 'length';
 "pop"                       return 'pop';
 "push"                      return 'push';
 
@@ -112,8 +113,9 @@ SENTENCIAS:
     |INST_FOR                                    {$$=$1;}
     |INST_CREAR_ARREGLO                          {$$=$1;}
     |INST_ASIGNAR_ARREGLO                        {$$=$1;}
-//    |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
-//    |error llc                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
+    |INST_PUSH                                   {$$=$1;}
+    |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
+    |error llc                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
 ;
 
 INST_CONSOLA:
@@ -121,15 +123,15 @@ INST_CONSOLA:
 ;
 DATO_CONSOL:
         EXP_CADENA                                  { $$ = $1; }
-//        |DATO_CONSOL mas   DATO_CONSOL              { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
+        |DATO_CONSOL mas   DATO_CONSOL              { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |DATO_CONSOL cm DATO_CONSOL                 { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |EXP_NUMERICA                               { $$ = $1; }
-//        |CONDICION                                  { $$ = $1; }
+        |CONDICION                                  { $$ = $1; }
 ;
 DATO:
         EXP_CADENA                                  { $$ = $1; }
         |EXP_NUMERICA                               { $$ = $1; }
-//        |CONDICION                                  { $$ = $1; }
+        |CONDICION                                  { $$ = $1; }
 ;
 EXP_CADENA:
      cadena                                     { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.CADENA);}
@@ -145,7 +147,9 @@ EXP_NUMERICA:
     |EXP_NUMERICA modular EXP_NUMERICA          { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MODULAR);}
     |id                                         { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.IDENTIFICADOR)}
     |pa EXP_NUMERICA pc                         { $$ = $2;}
+    |id pt length                               { $$ = instruccionesAST.nuevoLength($1);}
     |id ca EXP_NUMERICA cc                      { $$ = instruccionesAST.nuevoValorArreglo($1,$3, TIPO_VALOR.ARREGLO);}
+    |id pt pop pa pc                            { $$ = instruccionesAST.nuevoPop($1, TIPO_VALOR.POP);}
 ;
 CONDICION:
      CONDICION and CONDICION                    { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.AND);}
@@ -162,8 +166,8 @@ COMPARACION:
     |EXP_NUMERICA mayorIgual    EXP_NUMERICA        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MAYOR_IGUAL);}
     |DATO_COMPARACION mismo DATO_COMPARACION        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.IGUAL);}
     |DATO_COMPARACION diferente DATO_COMPARACION    { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.DIFERENTE);}
-//    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
-//    |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+    |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
 ;
 DATO_COMPARACION:
      EXP_CADENA                                 { $$ = $1; }
@@ -264,4 +268,8 @@ ARREGLO_DATOS:
 
 INST_ASIGNAR_ARREGLO:
     id ca EXP_NUMERICA cc igual DATO eos    { $$ = instruccionesAST.nuevaAsignacionArreglo($1,$3,$6);}
+;
+
+INST_PUSH:
+    id pt push pa DATO pc eos               { $$ = instruccionesAST.nuevoPush($1,$5);}
 ;
