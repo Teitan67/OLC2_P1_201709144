@@ -1,5 +1,25 @@
 // Procesamos las instrucciones reconocidas en nuestro AST
 
+function procesarPrograma(instrucciones, tablaDeSimbolos) {
+    let programa = instrucciones.programa;
+    let tabla=tablaDeSimbolos;
+    for(let Lsentencia of programa){
+        for(let sentencia of Lsentencia){
+            
+            if(sentencia.tipo==TIPO_INSTRUCCION.FUNCION_NUEVA){
+                crearFuncion(sentencia,tabla);
+                
+            }else{
+                procesarBloque(Lsentencia,tabla);
+                break;
+            }
+        }
+    }
+}
+
+function crearFuncion(instrucciones, tablaDeSimbolos){
+    funcionesTabla.push(instrucciones);
+}
 
 function procesarBloque(instrucciones, tablaDeSimbolos) {
     instrucciones.forEach(instruccion => {
@@ -33,10 +53,45 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             procesarAsignacionArreglo(instruccion,tablaDeSimbolos);
         }else if(instruccion.tipo===TIPO_INSTRUCCION.PUSH){
             procesarPush(instruccion,tablaDeSimbolos);
+        }else if(instruccion.tipo===TIPO_INSTRUCCION.FOR_IN){
+            procesarForIn(instruccion,tablaDeSimbolos);
+        }else if(instruccion.tipo===TIPO_INSTRUCCION.FOR_OF){
+            procesarForOf(instruccion,tablaDeSimbolos);
+        }else if(instruccion.tipo===TIPO_INSTRUCCION.FUNCION_LLAMAR){
+            procesarFuncion(instruccion,tablaDeSimbolos);
         }else {
             console.error('ERROR: tipo de instrucción no válido: ' + JSON.stringify(instruccion));
         }
     });
+}
+function procesarFuncion(instruccion,tablaDeSimbolos){
+    //console.log(funcionesTabla);
+    let funcion=obtenerFuncion(instruccion.identificador);
+    
+    if(funcion!==null){
+        let auxAmbito=ambito;
+        nuevoAmbito();
+        let parametros_entrada=instruccion.parametros;
+        let parametros_funcion=funcion.parametros;
+        let variables_locales=[];
+        let auxVarianle=null;
+        if (parametros_entrada.length==parametros_funcion.length){
+            for (const i in parametros_entrada) {
+                auxVarianle=parametros_funcion[i];
+                console.log(parametros_entrada[i]);
+                variables_locales.unshift(instruccionesAST.crearVariable(auxVarianle.identificador,auxVarianle.tipo_Var,parametros_entrada[i]));
+            }
+            let ast_parametro=instruccionesAST.nuevaVariable("let",variables_locales);
+            procesarCreacionVariable(ast_parametro, tablaDeSimbolos);
+            procesarBloque(funcion.sentencias,tablaDeSimbolos);
+            finAmbito(auxAmbito,ambito,tablaDeSimbolos);  
+        }else{
+            reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> tiene un numero de parametros invalidos" , 0, 0); 
+        }
+ 
+    }else{
+        reportarError("Semantico", "La siguiente funcion "+instruccion.identificador+"<br> no existe" , 0, 0); 
+    }
 }
 
 function procesarCreacionVariable(instruccion, tablaDeSimbolos) {
@@ -533,6 +588,66 @@ function procesarPop(expresion,tablaDeSimbolos){
         return auxVariable.valor.pop();
     } else {
         reportarError("Semantico", "La siguiente variable no existe para pop algo:<br>" + instruccion.identificador, 0, 0);
+    }
+}
+
+function procesarForIn(expresion,tablaDeSimbolos){
+    let auxiterador;
+    let auxAmbito=ambito;
+    nuevoAmbito();
+    if (!tablaDeSimbolos.verificarInsertar(expresion.iterador)) {
+        auxiterador = tablaDeSimbolos.obtenerVariable(expresion.iterador);
+        if(!auxiterador.tipo==="number"){
+            reportarError("Semantico", "La variable ya declarada no es un numero, se convirtio en numero:<br>" + instruccion.iterador, 0, 0);
+        }
+        auxiterador.tipo="number";
+        auxiterador.valor=0;
+    } else {
+        tablaDeSimbolos.agregar("let", expresion.iterador, "number", 0);
+        auxiterador = tablaDeSimbolos.obtenerVariable(expresion.iterador);
+    }
+    let i = auxiterador.valor;
+    if(!tablaDeSimbolos.verificarInsertar(expresion.arreglo)){
+        let auxArreglo = tablaDeSimbolos.getLength(expresion.arreglo);
+
+        while(i<auxArreglo-1){
+            auxiterador = tablaDeSimbolos.obtenerVariable(expresion.iterador);
+            i=auxiterador.valor;
+            procesarBloque(expresion.sentencias,tablaDeSimbolos);
+            procesarIncremento(instruccionesAST.nuevoIncremento(expresion.iterador),tablaDeSimbolos);
+        }
+        finAmbito(auxAmbito,ambito,tablaDeSimbolos);
+    }else{
+        reportarError("Semantico", "El arreglo a iterar no existe:<br>" + instruccion.arreglo, 0, 0);
+    }
+}
+
+function procesarForOf(expresion,tablaDeSimbolos){
+    let auxAmbito=ambito;
+    nuevoAmbito();
+    let valorIterado;
+    if (!tablaDeSimbolos.verificarInsertar(expresion.iterador)) {
+        valorIterado = tablaDeSimbolos.obtenerVariable(expresion.iterador);
+    } else {
+
+        tablaDeSimbolos.agregar("let", expresion.iterador, null, null);
+        valorIterado = tablaDeSimbolos.obtenerVariable(expresion.iterador);
+    }
+   
+    if(!tablaDeSimbolos.verificarInsertar(expresion.arreglo)){
+        let i = 0;
+        let auxArreglo = tablaDeSimbolos.getLength(expresion.arreglo);
+        let array =tablaDeSimbolos.obtenerVariable(expresion.arreglo);
+        valorIterado.tipo=array.tipo;
+        while(i<auxArreglo){
+            valorIterado.valor=array.valor[i];
+            tablaDeSimbolos.enviarVariable(valorIterado.id,valorIterado);
+            procesarBloque(expresion.sentencias,tablaDeSimbolos);
+            i++;
+        }
+        finAmbito(auxAmbito,ambito,tablaDeSimbolos);   
+    }else{
+        reportarError("Semantico", "El arreglo a iterar no existe:<br>" + instruccion.arreglo, 0, 0);
     }
 }
 /**

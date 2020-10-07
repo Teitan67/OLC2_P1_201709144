@@ -9,7 +9,8 @@ const TIPO_VALOR = {
 	ARREGLO:       'VAL_ARREGLO',
 	ATRIBUTO:	   'VAL_ATRIBUTO',
 	LENGTH: 	   'VAL_LENGTH',
-	POP:		   'VAL_POP'
+	POP:		   'VAL_POP',
+	PARAMETRO:	   'VAL_PARAMETRO'
 }
 
 // Constantes para los tipos de 'operaciones' que soporta nuestra gramática.
@@ -56,7 +57,12 @@ const TIPO_INSTRUCCION = {
 	DECREMENTO:			'INSTR_DECREMENTO',
 	CREAR_ARREGLO:   	'INSTR_CREAR_ARREGLO',
 	ASIGNAR_ARREGLO:	'INSTR_ASIGNAR_ARREGLO',
-	PUSH:				'INSTR_PUSH'
+	PUSH:				'INSTR_PUSH',
+	FOR_IN:				'INSTR_FOR_IN',
+	FOR_OF:				'INSTR_FOR_OF',
+	FUNCION_NUEVA:    	'INSTR_FUNCION_NUEVA',
+	FUNCION_LLAMAR:		'INSTR_FUNCION_LLAMADA',
+	RETURN:				'INSTR_RETURN'
 }
 
 //Operacion generica
@@ -236,6 +242,50 @@ const instruccionesAST = {
 		return{
 			tipo: tipo,
 			valor:id
+		}
+	},
+	nuevoForIn:function(iterador,arreglo,sentencias){
+		return{
+			tipo:TIPO_INSTRUCCION.FOR_IN,
+			iterador:iterador,
+			arreglo:arreglo,
+			sentencias:sentencias
+		}
+	},
+	nuevoForOf:function(iterador,arreglo,sentencias){
+		return{
+			tipo:TIPO_INSTRUCCION.FOR_OF,
+			iterador:iterador,
+			arreglo:arreglo,
+			sentencias:sentencias
+		}
+	},
+	nuevaFuncionCreada:function(id,parametros,sentencias) {
+		return{
+			tipo:TIPO_INSTRUCCION.FUNCION_NUEVA,
+			identificador:id,
+			parametros:parametros,
+			sentencias:sentencias
+		}
+	},
+	nuevaFuncionLlamada:function(id,parametros){
+		return{
+			tipo:TIPO_INSTRUCCION.FUNCION_LLAMAR,
+			identificador:id,
+			parametros:parametros
+		}
+	},
+	nuevoPrograma:function(programa){
+		return{
+			programa:programa
+			
+		}
+	},
+	nuevoParametro:function(id,tipo_Var){
+		return{
+			tipo:TIPO_VALOR.PARAMETRO,
+			identificador:id,
+			tipo_Var:tipo_Var
 		}
 	}
 }

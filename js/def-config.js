@@ -40,11 +40,12 @@ let tsGlobal;
 //Funciones del compilador
 function analizar() {
   tsGlobal = new TS([]);
+  funcionesTabla = [];
   limpiar();
   texto = editor.getValue();
   ast = compilador.parse(texto);
   mostrarJSON(JSON.stringify(ast)); 
-  procesarBloque(ast, tsGlobal);
+  procesarPrograma(ast, tsGlobal);
    
 }
 

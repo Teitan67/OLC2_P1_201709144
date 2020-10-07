@@ -94,9 +94,34 @@
 %% /* language grammar */
 
 PROGRAMA:   
-    LSENTENCIAS EOF                             { return $1;}
+    PROGRAMA_ESTRUCTURA EOF                             { return instruccionesAST.nuevoPrograma($1);}
+    
+;
+PROGRAMA_ESTRUCTURA:
+     FUNCIONES PROGRAMA_RECOLECTADO                        {$2.unshift($1); $$=$2;}
+    |PROGRAMA_RECOLECTADO                                  {$$=$1;}
+;
+PROGRAMA_RECOLECTADO:
+     LSENTENCIAS FUNCIONES PROGRAMA_RECOLECTADO            {$3.unshift($1); $3.unshift($2); $$=$3;}
+    |LSENTENCIAS                                           {$$=[$1];}
+    |                                                      {$$=[];}
 ;
 
+FUNCIONES:
+     FUNCIONES FUNCION                                     {$1.push($2); $$ = $1;}                                    
+    |FUNCION                                               {$$=[$1];}
+;
+
+FUNCION:
+    function id pa PARAMETROS pc lla LSENTENCIAS llc       {$$=instruccionesAST.nuevaFuncionCreada($2,$4,$7);}
+;
+PARAMETROS:
+     id VARIABLES_TIPO cm PARAMETROS            {$4.push(instruccionesAST.nuevoParametro($1,$2)); $$=$4;}
+    |id cm PARAMETROS                           {$3.push(instruccionesAST.nuevoParametro($1,null)); $$=$3;}
+    |id                                         {$$=[instruccionesAST.nuevoParametro($1,null)];}
+    |id VARIABLES_TIPO                          {$$=[instruccionesAST.nuevoParametro($1,$2)];}
+    |                                           {$$=[null];}
+;
 LSENTENCIAS:
      LSENTENCIAS SENTENCIAS                     { $1.push($2); $$ = $1; }
     |SENTENCIAS                                 { $$ = [$1]; }
@@ -114,24 +139,33 @@ SENTENCIAS:
     |INST_CREAR_ARREGLO                          {$$=$1;}
     |INST_ASIGNAR_ARREGLO                        {$$=$1;}
     |INST_PUSH                                   {$$=$1;}
+    |INST_FOR_IN                                 {$$=$1;}
+    |INST_FOR_OF                                 {$$=$1;}
+    |INST_FUNCION_LLAMADA                        {$$=$1;}
     |error eos                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
     |error llc                                   {$$=instruccionesAST.saltoError(); reportarError("Sintactico", "Linea mal escrita:<br>"+editor.getLine(this._$.first_line-1), this._$.first_column, this._$.first_line-1);}
 ;
-
+INST_FUNCION_LLAMADA:
+    id pa PARAMETRO_ENTRADA pc eos               {$$=instruccionesAST.nuevaFuncionLlamada($1,$3);}
+;
+PARAMETRO_ENTRADA:
+     DATO cm PARAMETRO_ENTRADA                   {$3.push($1); $$=$3;}
+    |DATO                                        {$$=[$1];}
+;
 INST_CONSOLA:
      console pt log pa DATO_CONSOL pc eos               { $$ = instruccionesAST.nuevoImprimir($5);}
 ;
 DATO_CONSOL:
         EXP_CADENA                                  { $$ = $1; }
-        |DATO_CONSOL mas   DATO_CONSOL              { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
+//        |DATO_CONSOL mas   DATO_CONSOL              { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |DATO_CONSOL cm DATO_CONSOL                 { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |EXP_NUMERICA                               { $$ = $1; }
-        |CONDICION                                  { $$ = $1; }
+//        |CONDICION                                  { $$ = $1; }
 ;
 DATO:
         EXP_CADENA                                  { $$ = $1; }
         |EXP_NUMERICA                               { $$ = $1; }
-        |CONDICION                                  { $$ = $1; }
+//        |CONDICION                                  { $$ = $1; }
 ;
 EXP_CADENA:
      cadena                                     { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.CADENA);}
@@ -166,8 +200,8 @@ COMPARACION:
     |EXP_NUMERICA mayorIgual    EXP_NUMERICA        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MAYOR_IGUAL);}
     |DATO_COMPARACION mismo DATO_COMPARACION        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.IGUAL);}
     |DATO_COMPARACION diferente DATO_COMPARACION    { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.DIFERENTE);}
-    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
-    |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+//    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+//    |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
 ;
 DATO_COMPARACION:
      EXP_CADENA                                 { $$ = $1; }
@@ -257,8 +291,8 @@ FOR_AUMENTO:
 INST_CREAR_ARREGLO:
      VARIABLES_ACCESO id ca cc eos                                                {$$=instruccionesAST.nuevoArreglo($1,$2,null,[]);}
     |VARIABLES_ACCESO id ca cc VARIABLES_TIPO eos                                 {$$=instruccionesAST.nuevoArreglo($1,$2,$5,[]);}
-    |VARIABLES_ACCESO id ca cc igual ca ARREGLO_DATOS cc eos                    {$$=instruccionesAST.nuevoArreglo($1,$2,null,$7);}
-    |VARIABLES_ACCESO id ca cc VARIABLES_TIPO igual ca ARREGLO_DATOS cc eos     {$$=instruccionesAST.nuevoArreglo($1,$2,$5,$8);}
+    |VARIABLES_ACCESO id ca cc igual ca ARREGLO_DATOS cc eos                      {$$=instruccionesAST.nuevoArreglo($1,$2,null,$7);}
+    |VARIABLES_ACCESO id ca cc VARIABLES_TIPO igual ca ARREGLO_DATOS cc eos       {$$=instruccionesAST.nuevoArreglo($1,$2,$5,$8);}
 ;
 
 ARREGLO_DATOS:
@@ -272,4 +306,14 @@ INST_ASIGNAR_ARREGLO:
 
 INST_PUSH:
     id pt push pa DATO pc eos               { $$ = instruccionesAST.nuevoPush($1,$5);}
+;
+INST_FOR_IN :
+    for pa FOR_IN_ASIGNACION in id pc lla LSENTENCIAS llc           { $$ =instruccionesAST.nuevoForIn($3,$5,$8) ;}
+;
+FOR_IN_ASIGNACION:
+     VARIABLES_ACCESO id        { $$ = $2;}
+    |id                         { $$ = $1;}
+;   
+INST_FOR_OF :
+    for pa FOR_IN_ASIGNACION of id pc lla LSENTENCIAS llc           { $$ =instruccionesAST.nuevoForOf($3,$5,$8) ;}
 ;

@@ -32,7 +32,7 @@ class TS {
 
     agregar(acceso,id, tipo, valor) {
         const nuevoSimbolo = crearSimbolo(acceso,id, tipo, valor);
-        this._simbolos.unshift(nuevoSimbolo);
+        this._simbolos.push(nuevoSimbolo);
     }
 
     actualizar(id, valor) {
@@ -105,3 +105,26 @@ class TS {
         this._simbolos=tabla;
     }
 }
+
+//Funciones
+const TIPO_FUNCION = {
+    VOID:   'VOID',
+    NUMERO: 'NUMBER',
+    BOOL:   'BOOLEANO',
+    CADENA: 'STRING'
+}
+
+
+
+ let funcionesTabla = [];
+
+ function obtenerFuncion(id){
+    
+    for (const funcion of funcionesTabla) {
+
+        if(funcion.identificador==id){
+            return funcion
+        }
+    }
+    return null
+ }
