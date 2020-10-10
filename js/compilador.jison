@@ -160,12 +160,12 @@ DATO_CONSOL:
 //        |DATO_CONSOL mas   DATO_CONSOL              { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |DATO_CONSOL cm DATO_CONSOL                 { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.CONCATENACION);}
         |EXP_NUMERICA                               { $$ = $1; }
-//        |CONDICION                                  { $$ = $1; }
+        |CONDICION                                  { $$ = $1; }
 ;
 DATO:
         EXP_CADENA                                  { $$ = $1; }
         |EXP_NUMERICA                               { $$ = $1; }
-//        |CONDICION                                  { $$ = $1; }
+        |CONDICION                                  { $$ = $1; }
 ;
 EXP_CADENA:
      cadena                                     { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.CADENA);}
@@ -200,8 +200,8 @@ COMPARACION:
     |EXP_NUMERICA mayorIgual    EXP_NUMERICA        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.MAYOR_IGUAL);}
     |DATO_COMPARACION mismo DATO_COMPARACION        { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.IGUAL);}
     |DATO_COMPARACION diferente DATO_COMPARACION    { $$ = instruccionesAST.nuevoOperacionBinaria($1,$3,TIPO_OPERACION.DIFERENTE);}
-//    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
-//    |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+    |false                                          { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
+   |true                                           { $$ = instruccionesAST.nuevoValor($1,TIPO_VALOR.BOOLEANO);}
 ;
 DATO_COMPARACION:
      EXP_CADENA                                 { $$ = $1; }
